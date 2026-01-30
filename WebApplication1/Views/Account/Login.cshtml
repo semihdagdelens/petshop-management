@@ -1,0 +1,63 @@
+@{
+    ViewData["Title"] = "Giriş";
+}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-primary mb-4">
+                <div class="card-header bg-primary text-white fw-bold">🔐 Giriş</div>
+                <div class="card-body">
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger">@ViewBag.Error</div>
+                    }
+
+                    <form asp-action="Login" method="post">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Rol</label>
+                            <select class="form-select" name="role" id="roleSelect">
+                                <option value="Admin">Admin</option>
+                                <option value="Customer">Müşteri</option>
+                            </select>
+                        </div>
+
+                        <div id="adminFields">
+                            <div class="mb-3">
+                                <label class="form-label">Kullanıcı Adı</label>
+                                <input type="text" name="username" class="form-control" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Şifre</label>
+                                <input type="password" name="password" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div id="customerFields" class="d-none">
+                            <div class="mb-3">
+                                <label class="form-label">Müşteri ID</label>
+                                <input type="number" name="customerId" class="form-control" />
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Giriş Yap</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        var roleSelect = document.getElementById("roleSelect");
+        var adminFields = document.getElementById("adminFields");
+        var customerFields = document.getElementById("customerFields");
+        function toggleFields() {
+            var isAdmin = roleSelect.value === "Admin";
+            adminFields.classList.toggle("d-none", !isAdmin);
+            customerFields.classList.toggle("d-none", isAdmin);
+        }
+        roleSelect.addEventListener("change", toggleFields);
+        toggleFields();
+    })();
+</script>

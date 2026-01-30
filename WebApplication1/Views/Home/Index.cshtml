@@ -1,0 +1,319 @@
+﻿@{
+    ViewData["Title"] = "Yönetim Paneli";
+
+    // --- ÖZET VERİLERİ HESAPLAMA (Tablolardan çekiyoruz) ---
+    decimal totalRevenue = 0;
+    decimal totalDebt = 0;
+    int sickCount = 0;
+    int expiringCount = 0;
+    int totalProducts = 0;
+    int animalProducts = 0;
+    int goodsProducts = 0;
+
+    if (ViewBag.Sales != null)
+    {
+        foreach (System.Data.DataRow row in (ViewBag.Sales as System.Data.DataTable).Rows)
+        {
+            totalRevenue += Convert.ToDecimal(row["Revenue"]);
+        }
+    }
+
+    if (ViewBag.Debt != null)
+    {
+        foreach (System.Data.DataRow row in (ViewBag.Debt as System.Data.DataTable).Rows)
+        {
+            totalDebt += Convert.ToDecimal(row["CurrentDebt"]);
+        }
+    }
+
+    if (ViewBag.Sick != null)
+    {
+        sickCount = (ViewBag.Sick as System.Data.DataTable).Rows.Count;
+    }
+
+    if (ViewBag.Expiring != null)
+    {
+        expiringCount = (ViewBag.Expiring as System.Data.DataTable).Rows.Count;
+    }
+
+    if (ViewBag.CatalogStats != null)
+    {
+        System.Data.DataTable stats = ViewBag.CatalogStats as System.Data.DataTable;
+        if (stats.Rows.Count > 0)
+        {
+            System.Data.DataRow row = stats.Rows[0];
+            totalProducts = Convert.ToInt32(row["Total"]);
+            animalProducts = Convert.ToInt32(row["Animals"]);
+            goodsProducts = Convert.ToInt32(row["Goods"]);
+        }
+    }
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    .card {
+        border: none;
+        border-radius: 12px;
+        transition: all 0.3s ease-in-out;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+    .icon-box {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: white;
+    }
+    .bg-gradient-primary { background: linear-gradient(45deg, #4e73df, #224abe); }
+    .bg-gradient-success { background: linear-gradient(45deg, #1cc88a, #13855c); }
+    .bg-gradient-warning { background: linear-gradient(45deg, #f6c23e, #dda20a); }
+    .bg-gradient-danger { background: linear-gradient(45deg, #e74a3b, #be2617); }
+    .table-hover tbody tr:hover { background-color: #f8f9fc; }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0 text-gray-800 fw-bold"><i class="fa-solid fa-dove text-primary me-2"></i>Cennet Kuş Evi</h1>
+        <p class="text-muted small mb-0">İşletme Genel Bakış ve Yönetim Paneli</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-controller="Home" asp-action="CreateOrder" class="btn btn-primary shadow-sm"><i class="fas fa-plus fa-sm text-white-50 me-2"></i>Yeni Satış Gir</a>
+        <a asp-controller="Home" asp-action="ProductCatalog" class="btn btn-outline-info shadow-sm"><i class="fas fa-list me-2"></i>Katalog</a>
+    </div>
+</div>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-@TempData["Type"] alert-dismissible fade show shadow-sm border-0 border-start border-5 border-@TempData["Type"]">
+        <i class="fas fa-info-circle me-2"></i> @TempData["Message"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card shadow h-100 py-2 border-start border-5 border-primary">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs fw-bold text-primary text-uppercase mb-1">Toplam Ciro</div>
+                        <div class="h5 mb-0 fw-bold text-gray-800">@totalRevenue.ToString("N2") ₺</div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="icon-box bg-gradient-primary"><i class="fas fa-coins"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card shadow h-100 py-2 border-start border-5 border-warning">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs fw-bold text-warning text-uppercase mb-1">Bekleyen Tahsilat</div>
+                        <div class="h5 mb-0 fw-bold text-gray-800">@totalDebt.ToString("N2") ₺</div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="icon-box bg-gradient-warning"><i class="fas fa-hand-holding-dollar"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card shadow h-100 py-2 border-start border-5 border-danger">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs fw-bold text-danger text-uppercase mb-1">Hasta Hayvanlar</div>
+                        <div class="h5 mb-0 fw-bold text-gray-800">@sickCount Adet</div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="icon-box bg-gradient-danger"><i class="fas fa-notes-medical"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card shadow h-100 py-2 border-start border-5 border-secondary">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs fw-bold text-secondary text-uppercase mb-1">SKT Yaklaşanlar</div>
+                        <div class="h5 mb-0 fw-bold text-gray-800">@expiringCount Ürün</div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="icon-box bg-secondary"><i class="fas fa-hourglass-half"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow h-100 border-start border-5 border-info">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-xs fw-bold text-info text-uppercase mb-1">Ürün Kataloğu</div>
+                        <div class="h5 mb-1 fw-bold text-gray-800">@totalProducts Ürün</div>
+                        <div class="small text-muted">Animal: @animalProducts | Goods: @goodsProducts</div>
+                    </div>
+                    <a asp-controller="Home" asp-action="ProductCatalog" class="btn btn-outline-info">Kataloğu Aç</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-7 mb-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between bg-white border-bottom-0">
+                <h6 class="m-0 fw-bold text-primary"><i class="fas fa-store me-2"></i>Mağaza Performansı</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light text-secondary"><tr><th>Mağaza</th><th class="text-center">Sipariş</th><th class="text-end">Ciro</th></tr></thead>
+                        <tbody>
+                            @if (ViewBag.Sales != null)
+                            {
+                                foreach (System.Data.DataRow row in (ViewBag.Sales as System.Data.DataTable).Rows)
+                                {
+                                    <tr>
+                                        <td class="ps-3 fw-bold">@row["StoreName"]</td>
+                                        <td class="text-center"><span class="badge bg-light text-dark border">@row["TotalOrders"]</span></td>
+                                        <td class="text-end pe-3 fw-bold text-success">@row["Revenue"] ₺</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5 mb-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 bg-white border-bottom-0">
+                <h6 class="m-0 fw-bold text-warning"><i class="fas fa-file-invoice-dollar me-2"></i>Borçlu Müşteriler</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light text-secondary"><tr><th>Müşteri</th><th class="text-end">Borç</th><th></th></tr></thead>
+                        <tbody>
+                            @if (ViewBag.Debt != null)
+                            {
+                                foreach (System.Data.DataRow row in (ViewBag.Debt as System.Data.DataTable).Rows)
+                                {
+                                    <tr>
+                                        <td class="ps-3">@row["FullName"]</td>
+                                        <td class="text-end fw-bold text-danger">@row["CurrentDebt"] ₺</td>
+                                        <td class="text-end pe-3"><a href="/Home/MakePayment" class="btn btn-sm btn-outline-success rounded-pill px-3">Öde</a></td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12 mb-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 bg-white border-bottom-0">
+                <h6 class="m-0 fw-bold text-info"><i class="fas fa-truck-moving me-2"></i>Son Transfer Hareketleri</h6>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light text-secondary"><tr><th>Tarih</th><th>Kaynak</th><th>Hedef</th><th>Kurye</th></tr></thead>
+                    <tbody>
+                        @if (ViewBag.Transfers != null)
+                        {
+                            foreach (System.Data.DataRow row in (ViewBag.Transfers as System.Data.DataTable).Rows)
+                            {
+                                <tr>
+                                    <td class="ps-3 text-muted"><i class="far fa-clock me-1"></i> @Convert.ToDateTime(row["TransferDate"]).ToString("dd.MM.yyyy")</td>
+                                    <td><span class="badge bg-secondary">@row["FromLoc"]</span> <i class="fas fa-arrow-right mx-1 text-muted"></i> <span class="badge bg-success">@row["ToLoc"]</span></td>
+                                    <td class="pe-3">@row["CarrierName"]</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header bg-danger text-white">
+                <h6 class="m-0 fw-bold"><i class="fas fa-heart-crack me-2"></i>Acil Müdahale (Veteriner)</h6>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-sm mb-0">
+                    <tbody>
+                        @if (ViewBag.Sick != null)
+                        {
+                            foreach (System.Data.DataRow row in (ViewBag.Sick as System.Data.DataTable).Rows)
+                            {
+                                <tr>
+                                    <td class="ps-3 py-2">@row["BreedType"]</td>
+                                    <td class="text-muted small">@row["CurrentLocation"]</td>
+                                    <td class="pe-3 text-end"><span class="badge bg-danger">@row["HealthStatus"]</span></td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header bg-dark text-white">
+                <h6 class="m-0 fw-bold"><i class="fas fa-users me-2"></i>Personel Durumu</h6>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-sm mb-0">
+                    <tbody>
+                        @if (ViewBag.Employees != null)
+                        {
+                            foreach (System.Data.DataRow row in (ViewBag.Employees as System.Data.DataTable).Rows)
+                            {
+                                <tr>
+                                    <td class="ps-3 py-2 fw-bold">@row["FirstName"] @row["LastName"]</td>
+                                    <td><span class="badge bg-light text-dark border">@row["RoleDetail"]</span></td>
+                                    <td class="pe-3 text-end small text-muted">@row["LocationName"]</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

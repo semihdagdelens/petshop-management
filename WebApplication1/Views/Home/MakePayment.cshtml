@@ -1,0 +1,46 @@
+﻿@{
+    ViewData["Title"] = "Tahsilat";
+}
+
+<div class="container mt-4 col-md-6">
+    <div class="card shadow border-success">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold"><i class="fas fa-hand-holding-usd me-2"></i>Tahsilat Ekranı</h5>
+        </div>
+        <div class="card-body">
+            <form asp-action="MakePayment" method="post">
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Müşteri Seçin:</label>
+                    <select name="CustomerID" class="form-select" required>
+                        <option value="">-- Borçlu Müşteriler --</option>
+                        @if (ViewBag.Customers != null)
+                        {
+                            foreach (System.Data.DataRow row in (ViewBag.Customers as System.Data.DataTable).Rows)
+                            {
+                                <option value="@row["CustomerID"]">@row["FullName"]</option>
+                            }
+                        }
+                    </select>
+                    <div class="form-text text-success">Listede sadece güncel borcu olan müşteriler görünür.</div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Ödeme Tutarı (TL):</label>
+                    <div class="input-group">
+                        <span class="input-group-text">₺</span>
+                        <input type="number" step="0.01" name="Amount" class="form-control" required placeholder="0.00" />
+                    </div>
+                </div>
+
+                <div class="alert alert-light border shadow-sm">
+                    <small><i class="fas fa-info-circle text-primary me-1"></i> <strong>Otomatik Kontrol:</strong> Müşteri borcundan fazla ödeme yaparsa sistem uyarır ve sadece borç kadarını tahsil eder.</small>
+                </div>
+
+                <button type="submit" class="btn btn-success w-100 btn-lg shadow-sm">
+                    <i class="fas fa-check me-2"></i>Ödemeyi Al
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

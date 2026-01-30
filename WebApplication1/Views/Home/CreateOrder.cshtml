@@ -1,0 +1,124 @@
+﻿@{
+    ViewData["Title"] = "Yeni Sipariş";
+    string selectedStoreName = "";
+    if (ViewBag.SelectedStoreId != null && ViewBag.Stores != null)
+    {
+        foreach (System.Data.DataRow row in (ViewBag.Stores as System.Data.DataTable).Rows)
+        {
+            if ((int)ViewBag.SelectedStoreId == (int)row["LocationID"])
+            {
+                selectedStoreName = row["Name"].ToString() ?? "";
+                break;
+            }
+        }
+    }
+}
+
+<div class="container mt-4 col-md-8">
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-@TempData["Type"] alert-dismissible fade show shadow-sm border-0 border-start border-5 border-@TempData["Type"]">
+            <i class="fas fa-info-circle me-2"></i> @TempData["Message"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    <div class="card shadow border-warning mb-3">
+        <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold"><i class="fas fa-cart-plus me-2"></i>Yeni Sipariş Girişi</h5>
+        </div>
+        <div class="card-body">
+            <form asp-action="CreateOrder" method="get">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Mağaza Seç (Ürünleri Filtrele):</label>
+                    <select name="storeId" class="form-select" required>
+                        <option value="">-- Mağaza Seçin --</option>
+                        @if (ViewBag.Stores != null)
+                        {
+                            foreach (System.Data.DataRow row in (ViewBag.Stores as System.Data.DataTable).Rows)
+                            {
+                                if ((ViewBag.SelectedStoreId != null) && (int)ViewBag.SelectedStoreId == (int)row["LocationID"])
+                                {
+                                    <option value="@row["LocationID"]" selected>@row["Name"]</option>
+                                }
+                                else
+                                {
+                                    <option value="@row["LocationID"]">@row["Name"]</option>
+                                }
+                            }
+                        }
+                    </select>
+                    <div class="form-text text-muted">Sadece seçilen mağazanın stokları listelenir.</div>
+                </div>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-outline-warning">Ürün Listesini Güncelle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow border-warning">
+        <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold">Sipariş Oluştur</h5>
+        </div>
+        <div class="card-body">
+            @if (ViewBag.SelectedStoreId == null)
+            {
+                <div class="alert alert-warning">Önce bir mağaza seçip ürün listesini yüklemelisin.</div>
+            }
+            <form asp-action="CreateOrder" method="post">
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Müşteri Seçin:</label>
+                    <select name="CustomerID" class="form-select" required>
+                        <option value="">-- Müşteri Listesi --</option>
+                        @if (ViewBag.Customers != null)
+                        {
+                            foreach (System.Data.DataRow row in (ViewBag.Customers as System.Data.DataTable).Rows)
+                            {
+                                <option value="@row["CustomerID"]">@row["FullName"]</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Satış Yapılan Mağaza:</label>
+                    <input type="text" class="form-control" value="@selectedStoreName" readonly />
+                    <input type="hidden" name="StoreID" value="@(ViewBag.SelectedStoreId ?? 0)" />
+                    <div class="form-text text-muted">Ürünler bu mağazanın stoklarından gelir.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Ürün Seçin:</label>
+                    <select name="ProductID" class="form-select" required @(ViewBag.SelectedStoreId == null ? "disabled" : "")>
+                        <option value="">-- Ürün Listesi (Fiyat) --</option>
+                        @if (ViewBag.Products != null && (ViewBag.Products as System.Data.DataTable).Rows.Count > 0)
+                        {
+                            foreach (System.Data.DataRow row in (ViewBag.Products as System.Data.DataTable).Rows)
+                            {
+                                <option value="@row["ProductID"]">@row["DisplayName"]</option>
+                            }
+                        }
+                    </select>
+                    <div class="form-text text-muted">Ürünler seçilen mağazanın stoklarından gelir.</div>
+                    @if (ViewBag.Products == null || (ViewBag.Products as System.Data.DataTable).Rows.Count == 0)
+                    {
+                        <div class="form-text text-danger">Bu mağazada stok yok. Önce depodan transfer yapın.</div>
+                    }
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Adet:</label>
+                    <input type="number" name="Qty" class="form-control" required value="1" min="1" @(ViewBag.SelectedStoreId == null ? "disabled" : "") />
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-warning btn-lg shadow-sm" @(ViewBag.SelectedStoreId == null ? "disabled" : "")>
+                        <i class="fas fa-check-circle me-2"></i>Siparişi Tamamla
+                    </button>
+                    <a href="/Home/Index" class="btn btn-outline-secondary">İptal</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

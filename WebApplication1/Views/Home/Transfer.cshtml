@@ -1,0 +1,356 @@
+﻿@{
+    ViewData["Title"] = "Transfer";
+}
+
+<div class="container mt-4">
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-@TempData["Type"] alert-dismissible fade show shadow-sm border-0 border-start border-5 border-@TempData["Type"]">
+            <i class="fas fa-info-circle me-2"></i> @TempData["Message"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger shadow-sm border-0 border-start border-5 border-danger">
+            <i class="fas fa-triangle-exclamation me-2"></i> @ViewBag.Error
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-lg-5 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-info text-white fw-bold">🚚 Depo → Mağaza (Goods)</div>
+                <div class="card-body">
+                    <form asp-action="Transfer" method="get" class="mb-3">
+                        <div class="mb-2">
+                            <label class="form-label fw-bold">Depo Seç (Ürünleri Yükle)</label>
+                            <select name="goodsSrcId" class="form-select" required>
+                                <option value="">-- Depo Seçin --</option>
+                                @if (ViewBag.Warehouses != null)
+                                {
+                                    foreach (System.Data.DataRow row in (ViewBag.Warehouses as System.Data.DataTable).Rows)
+                                    {
+                                        if ((ViewBag.SelectedGoodsSrcId != null) && (int)ViewBag.SelectedGoodsSrcId == (int)row["LocationID"])
+                                        {
+                                            <option value="@row["LocationID"]" selected>@row["Name"]</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@row["LocationID"]">@row["Name"]</option>
+                                        }
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-outline-info w-100">Goods Ürünlerini Yükle</button>
+                    </form>
+                    @if (ViewBag.GoodsProducts != null && (ViewBag.GoodsProducts as System.Data.DataTable).Rows.Count > 0)
+                    {
+                        <div class="mb-3">
+                            <div class="small text-muted">Yüklenen Goods Ürünleri</div>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Ürün</th>
+                                            <th class="text-end">Stok</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (System.Data.DataRow row in (ViewBag.GoodsProducts as System.Data.DataTable).Rows)
+                                        {
+                                            <tr>
+                                                <td>@row["Name"]</td>
+                                                <td class="text-end">@row["Quantity"]</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    }
+                    <form asp-action="Transfer" method="post">
+                        <input type="hidden" name="Type" value="Goods" />
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Depo (Warehouse)</label>
+                            <select name="SrcID" class="form-select" required>
+                                <option value="">-- Depo Seçin --</option>
+                                @if (ViewBag.Warehouses != null)
+                                {
+                                    foreach (System.Data.DataRow row in (ViewBag.Warehouses as System.Data.DataTable).Rows)
+                                    {
+                                        if ((ViewBag.SelectedGoodsSrcId != null) && (int)ViewBag.SelectedGoodsSrcId == (int)row["LocationID"])
+                                        {
+                                            <option value="@row["LocationID"]" selected>@row["Name"]</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@row["LocationID"]">@row["Name"]</option>
+                                        }
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Hedef Mağaza</label>
+                            <select name="DstID" class="form-select" required>
+                                <option value="">-- Mağaza Seçin --</option>
+                                @if (ViewBag.Stores != null)
+                                {
+                                    foreach (System.Data.DataRow row in (ViewBag.Stores as System.Data.DataTable).Rows)
+                                    {
+                                        <option value="@row["LocationID"]">@row["Name"]</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Kurye (Carrier)</label>
+                            <select name="CarrierID" class="form-select" required>
+                                <option value="">-- Kurye Seçin --</option>
+                                @if (ViewBag.Carriers != null)
+                                {
+                                    foreach (System.Data.DataRow row in (ViewBag.Carriers as System.Data.DataTable).Rows)
+                                    {
+                                        <option value="@row["EmployeeID"]">@row["FullName"]</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Goods Ürünü</label>
+                            <select name="ProductID" class="form-select" required>
+                                <option value="">-- Ürün Seçin --</option>
+                                @if (ViewBag.GoodsProducts != null && (ViewBag.GoodsProducts as System.Data.DataTable).Rows.Count > 0)
+                                {
+                                    foreach (System.Data.DataRow row in (ViewBag.GoodsProducts as System.Data.DataTable).Rows)
+                                    {
+                                        <option value="@row["ProductID"]">@row["Name"] (Stok: @row["Quantity"])</option>
+                                    }
+                                }
+                            </select>
+                            @if (ViewBag.GoodsProducts == null || (ViewBag.GoodsProducts as System.Data.DataTable).Rows.Count == 0)
+                            {
+                                <div class="form-text text-danger">Bu depoda stok yok.</div>
+                            }
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Miktar</label>
+                            <input type="number" name="Qty" class="form-control" required min="1" value="1" />
+                        </div>
+                        <button type="submit" class="btn btn-info text-white w-100">Goods Transferi</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white fw-bold">🐣 BreedingUnit → Mağaza (Animal)</div>
+                <div class="card-body">
+                    <form asp-action="Transfer" method="get" class="mb-3">
+                        <div class="mb-2">
+                            <label class="form-label fw-bold">BreedingUnit Seç (Ürünleri Yükle)</label>
+                            <select name="animalSrcId" class="form-select" required>
+                                <option value="">-- BreedingUnit Seçin --</option>
+                                @if (ViewBag.BreedingUnits != null)
+                                {
+                                    foreach (System.Data.DataRow row in (ViewBag.BreedingUnits as System.Data.DataTable).Rows)
+                                    {
+                                        if ((ViewBag.SelectedAnimalSrcId != null) && (int)ViewBag.SelectedAnimalSrcId == (int)row["LocationID"])
+                                        {
+                                            <option value="@row["LocationID"]" selected>@row["Name"]</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@row["LocationID"]">@row["Name"]</option>
+                                        }
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-outline-primary w-100">Animal Ürünlerini Yükle</button>
+                    </form>
+                    @if (ViewBag.AnimalProducts != null && (ViewBag.AnimalProducts as System.Data.DataTable).Rows.Count > 0)
+                    {
+                        <div class="mb-3">
+                            <div class="small text-muted">Yüklenen Animal Ürünleri</div>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Ürün</th>
+                                            <th class="text-end">Stok</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (System.Data.DataRow row in (ViewBag.AnimalProducts as System.Data.DataTable).Rows)
+                                        {
+                                            <tr>
+                                                <td>@row["Name"]</td>
+                                                <td class="text-end">@row["Quantity"]</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    }
+                    <form asp-action="Transfer" method="post">
+                        <input type="hidden" name="Type" value="Animal" />
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Üretimhane (BreedingUnit)</label>
+                            <select name="SrcID" class="form-select" required>
+                                <option value="">-- BreedingUnit Seçin --</option>
+                                @if (ViewBag.BreedingUnits != null)
+                                {
+                                    foreach (System.Data.DataRow row in (ViewBag.BreedingUnits as System.Data.DataTable).Rows)
+                                    {
+                                        if ((ViewBag.SelectedAnimalSrcId != null) && (int)ViewBag.SelectedAnimalSrcId == (int)row["LocationID"])
+                                        {
+                                            <option value="@row["LocationID"]" selected>@row["Name"]</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@row["LocationID"]">@row["Name"]</option>
+                                        }
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Hedef Mağaza</label>
+                            <select name="DstID" class="form-select" required>
+                                <option value="">-- Mağaza Seçin --</option>
+                                @if (ViewBag.Stores != null)
+                                {
+                                    foreach (System.Data.DataRow row in (ViewBag.Stores as System.Data.DataTable).Rows)
+                                    {
+                                        <option value="@row["LocationID"]">@row["Name"]</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Kurye (Carrier)</label>
+                            <select name="CarrierID" class="form-select" required>
+                                <option value="">-- Kurye Seçin --</option>
+                                @if (ViewBag.Carriers != null)
+                                {
+                                    foreach (System.Data.DataRow row in (ViewBag.Carriers as System.Data.DataTable).Rows)
+                                    {
+                                        <option value="@row["EmployeeID"]">@row["FullName"]</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Animal Ürünü</label>
+                            <select name="ProductID" class="form-select" required>
+                                <option value="">-- Ürün Seçin --</option>
+                                @if (ViewBag.AnimalProducts != null && (ViewBag.AnimalProducts as System.Data.DataTable).Rows.Count > 0)
+                                {
+                                    foreach (System.Data.DataRow row in (ViewBag.AnimalProducts as System.Data.DataTable).Rows)
+                                    {
+                                        <option value="@row["ProductID"]">@row["Name"] (Stok: @row["Quantity"])</option>
+                                    }
+                                }
+                            </select>
+                            @if (ViewBag.AnimalProducts == null || (ViewBag.AnimalProducts as System.Data.DataTable).Rows.Count == 0)
+                            {
+                                <div class="form-text text-danger">Bu üretimhanede hayvan yok.</div>
+                            }
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Miktar</label>
+                            <input type="number" name="Qty" class="form-control" required min="1" value="1" />
+                            <div class="form-text text-muted">Animal ürünlerinde miktar 1 olmalıdır.</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary text-white w-100">Animal Transferi</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-light fw-bold">📦 Güncel Stok (Lokasyon Bazlı)</div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Lokasyon</th>
+                                    <th>Tip</th>
+                                    <th>Ürün</th>
+                                    <th>Miktar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (ViewBag.Inventory != null && (ViewBag.Inventory as System.Data.DataTable).Rows.Count > 0)
+                                {
+                                    foreach (System.Data.DataRow row in (ViewBag.Inventory as System.Data.DataTable).Rows)
+                                    {
+                                        <tr>
+                                            <td>@row["LocationName"]</td>
+                                            <td>@row["LocationType"]</td>
+                                            <td>@row["Category"] (@row["ProductType"])</td>
+                                            <td>@row["Quantity"]</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-3">Stok kaydı bulunamadı.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow">
+                <div class="card-header bg-light fw-bold">🧾 Son Transferler</div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead class="table-secondary">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Tarih</th>
+                                    <th>Kaynak → Hedef</th>
+                                    <th>Ürün</th>
+                                    <th>Adet</th>
+                                    <th>Kurye</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (ViewBag.RecentTransfers != null && (ViewBag.RecentTransfers as System.Data.DataTable).Rows.Count > 0)
+                                {
+                                    foreach (System.Data.DataRow row in (ViewBag.RecentTransfers as System.Data.DataTable).Rows)
+                                    {
+                                        <tr>
+                                            <td>@row["TransferID"]</td>
+                                            <td>@Convert.ToDateTime(row["TransferDate"]).ToString("dd.MM.yyyy")</td>
+                                            <td>@row["FromLoc"] → @row["ToLoc"]</td>
+                                            <td>@row["Category"] (@row["ProductType"])</td>
+                                            <td>@row["Quantity"]</td>
+                                            <td>@row["CarrierName"]</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-3">Henüz transfer kaydı yok.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

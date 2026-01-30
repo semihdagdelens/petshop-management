@@ -1,0 +1,94 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Cennet Kuş Evi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-3 shadow">
+            <div class="container">
+                @{
+                    var role = HttpContextAccessor.HttpContext?.Session.GetString("Role") ?? "";
+                    var brandController = role == "Customer" ? "Customer" : "Home";
+                    var brandAction = role == "Customer" ? "Shop" : "Index";
+                }
+                <a class="navbar-brand fw-bold" asp-area="" asp-controller="@brandController" asp-action="@brandAction">Cennet Kuş Evi</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        @if (role == "Admin")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/Home/Index">📊 Dashboard</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-warning" href="/Home/CreateOrder">🛒 Satış</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-info" asp-controller="Home" asp-action="ProductCatalog">🧾 Katalog</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-success" href="/Home/MakePayment">💸 Tahsilat</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-success" href="/Home/CustomerPurchases">🧾 Müşteri Alışverişleri</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-info" href="/Home/Transfer">🚚 Lojistik</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-danger" href="/Home/ReceiveSupply">📦 Depo</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-primary" href="/Home/Breeding">🐣 Üretim & Vet</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-light" href="/Home/HR">👤 İK</a>
+                            </li>
+                        }
+                        else if (role == "Customer")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-success" href="/Customer/Shop">🛍️ Alışveriş</a>
+                            </li>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(role))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-light" href="/Account/Logout">Çıkış</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-light" href="/Account/Login">Giriş</a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted mt-5 py-3 text-center bg-light">
+        <div class="container">
+            &copy; 2025 - Cennet Kuş Evi - Veritabanı Projesi
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

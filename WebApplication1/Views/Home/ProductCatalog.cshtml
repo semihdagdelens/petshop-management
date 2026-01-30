@@ -1,0 +1,203 @@
+﻿@{
+    ViewData["Title"] = "Ürün Kataloğu";
+    string activeType = ViewBag.Type as string ?? "";
+    string activeQuery = ViewBag.Query as string ?? "";
+    string activeHealth = ViewBag.Health as string ?? "";
+    string activeSort = ViewBag.Sort as string ?? "";
+}
+
+<div class="container mt-4">
+    <div class="card shadow border-info">
+        <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold">🧾 Ürün Kataloğu</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Tür</label>
+                    <select name="type" class="form-select">
+                        @if (string.IsNullOrWhiteSpace(activeType))
+                        {
+                            <option value="" selected>Hepsi</option>
+                        }
+                        else
+                        {
+                            <option value="">Hepsi</option>
+                        }
+                        @if (activeType == "Animal")
+                        {
+                            <option value="Animal" selected>Animal</option>
+                        }
+                        else
+                        {
+                            <option value="Animal">Animal</option>
+                        }
+                        @if (activeType == "Goods")
+                        {
+                            <option value="Goods" selected>Goods</option>
+                        }
+                        else
+                        {
+                            <option value="Goods">Goods</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Sağlık (Animal)</label>
+                    <select name="health" class="form-select">
+                        @if (string.IsNullOrWhiteSpace(activeHealth))
+                        {
+                            <option value="" selected>Hepsi</option>
+                        }
+                        else
+                        {
+                            <option value="">Hepsi</option>
+                        }
+                        @if (activeHealth == "Healthy")
+                        {
+                            <option value="Healthy" selected>Healthy</option>
+                        }
+                        else
+                        {
+                            <option value="Healthy">Healthy</option>
+                        }
+                        @if (activeHealth == "Sick")
+                        {
+                            <option value="Sick" selected>Sick</option>
+                        }
+                        else
+                        {
+                            <option value="Sick">Sick</option>
+                        }
+                        @if (activeHealth == "Recovering")
+                        {
+                            <option value="Recovering" selected>Recovering</option>
+                        }
+                        else
+                        {
+                            <option value="Recovering">Recovering</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Arama</label>
+                    <input type="text" name="q" value="@activeQuery" class="form-control" placeholder="Kategori, breed veya materyal..." />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Sıralama</label>
+                    <select name="sort" class="form-select">
+                        @if (string.IsNullOrWhiteSpace(activeSort))
+                        {
+                            <option value="" selected>ID (A-Z)</option>
+                        }
+                        else
+                        {
+                            <option value="">ID (A-Z)</option>
+                        }
+                        @if (activeSort == "newest")
+                        {
+                            <option value="newest" selected>En Yeni</option>
+                        }
+                        else
+                        {
+                            <option value="newest">En Yeni</option>
+                        }
+                        @if (activeSort == "price_asc")
+                        {
+                            <option value="price_asc" selected>Fiyat Artan</option>
+                        }
+                        else
+                        {
+                            <option value="price_asc">Fiyat Artan</option>
+                        }
+                        @if (activeSort == "price_desc")
+                        {
+                            <option value="price_desc" selected>Fiyat Azalan</option>
+                        }
+                        else
+                        {
+                            <option value="price_desc">Fiyat Azalan</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-12">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-info text-white">Filtrele</button>
+                        <a href="/Home/ProductCatalog" class="btn btn-outline-secondary">Temizle</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger mt-3">@ViewBag.Error</div>
+    }
+
+    <div class="card shadow mt-4">
+        <div class="card-header bg-light">
+            <strong>Ürün Listesi</strong>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped mb-0 align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Tür</th>
+                            <th>Kategori</th>
+                            <th>Fiyat</th>
+                            <th>Detay</th>
+                            <th>Sağlık / SKT</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (ViewBag.Products != null && (ViewBag.Products as System.Data.DataTable).Rows.Count > 0)
+                        {
+                            foreach (System.Data.DataRow row in (ViewBag.Products as System.Data.DataTable).Rows)
+                            {
+                                string type = row["ProductType"]?.ToString() ?? "";
+                                string detail = type == "Animal"
+                                    ? "Breed: " + (row["BreedType"]?.ToString() ?? "-") + " | Gender: " + (row["Gender"]?.ToString() ?? "-")
+                                    : "Materyal: " + (row["Material"]?.ToString() ?? "-") + " | Boyut: " + (row["Size"]?.ToString() ?? "-");
+
+                                string statusCell;
+                                if (type == "Animal")
+                                {
+                                    statusCell = row["HealthStatus"]?.ToString() ?? "-";
+                                }
+                                else
+                                {
+                                    if (row["ExpireDate"] == DBNull.Value)
+                                    {
+                                        statusCell = "SKT: -";
+                                    }
+                                    else
+                                    {
+                                        string daysRemaining = row["DaysRemaining"]?.ToString() ?? "";
+                                        statusCell = "SKT: " + Convert.ToDateTime(row["ExpireDate"]).ToString("yyyy-MM-dd") + " (" + daysRemaining + "g)";
+                                    }
+                                }
+                                <tr>
+                                    <td>@row["ProductID"]</td>
+                                    <td>@type</td>
+                                    <td>@row["Category"]</td>
+                                    <td>@row["StandardPrice"] ₺</td>
+                                    <td>@detail</td>
+                                    <td>@statusCell</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">Katalogda kayıt bulunamadı.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

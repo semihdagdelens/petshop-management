@@ -1,0 +1,85 @@
+﻿@{
+    ViewData["Title"] = "İnsan Kaynakları";
+}
+<div class="container mt-4">
+    <h2 class="mb-4 text-light">👤 İnsan Kaynakları Yönetimi</h2>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow border-success mb-3">
+                <div class="card-header bg-success text-white fw-bold">💰 Maaş Zammı (sp_IncreaseSalary)</div>
+                <div class="card-body">
+                    <form asp-action="UpdateSalary" method="post">
+                        <div class="mb-3"><label>Çalışan ID:</label><input type="number" name="EmployeeID" class="form-control" required /></div>
+                        <div class="mb-3">
+                            <label>Zam Oranı (%):</label><input type="number" step="0.01" name="Percentage" class="form-control" required value="10" />
+                            <small class="text-danger">Test: Eksi girersen hata verir!</small>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Güncelle</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow border-secondary mb-3">
+                <div class="card-header bg-secondary text-white fw-bold">📍 Personel Tayin (sp_AssignEmployeeToLocation)</div>
+                <div class="card-body">
+                    <form asp-action="AssignLocation" method="post">
+                        <div class="mb-3"><label>Çalışan ID:</label><input type="number" name="EmployeeID" class="form-control" required /></div>
+                        <div class="mb-3"><label>Yeni Lokasyon ID:</label><input type="number" name="LocID" class="form-control" required /></div>
+                        <button type="submit" class="btn btn-secondary w-100">Lokasyonu Değiştir</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow border-primary mt-4">
+        <div class="card-header bg-primary text-white fw-bold">📋 Çalışan Listesi</div>
+        <div class="card-body">
+            @if (ViewBag.Employees != null)
+            {
+                var table = ViewBag.Employees as System.Data.DataTable;
+                if (table.Rows.Count == 0)
+                {
+                    <div class="alert alert-warning mb-0">Gösterilecek çalışan bulunamadı.</div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover align-middle">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Ad</th>
+                                    <th>Soyad</th>
+                                    <th>Tip</th>
+                                    <th>Yaş</th>
+                                    <th>Maaş</th>
+                                    <th>Lokasyon</th>
+                                    <th>Lokasyon Tipi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (System.Data.DataRow row in table.Rows)
+                                {
+                                    <tr>
+                                        <td>@row["EmployeeID"]</td>
+                                        <td>@row["FirstName"]</td>
+                                        <td>@row["LastName"]</td>
+                                        <td>@row["EmployeeType"]</td>
+                                        <td>@row["Age"]</td>
+                                        <td>@row["Salary"] ₺</td>
+                                        <td>@row["LocationName"] (@row["LocationID"])</td>
+                                        <td>@row["LocationType"]</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>

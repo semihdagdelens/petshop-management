@@ -1,0 +1,92 @@
+﻿@{
+    ViewData["Title"] = "Müşteri Satın Alımları";
+}
+
+<div class="container mt-4">
+    <div class="card shadow mb-4">
+        <div class="card-header bg-success text-white fw-bold">🧾 Müşteri Satın Alımları</div>
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Müşteri</label>
+                    <select name="customerId" class="form-select">
+                        <option value="">Tümü</option>
+                        @if (ViewBag.Customers != null)
+                        {
+                            foreach (System.Data.DataRow row in (ViewBag.Customers as System.Data.DataTable).Rows)
+                            {
+                                if ((ViewBag.SelectedCustomerId != null) && (int)ViewBag.SelectedCustomerId == (int)row["CustomerID"])
+                                {
+                                    <option value="@row["CustomerID"]" selected>@row["FullName"]</option>
+                                }
+                                else
+                                {
+                                    <option value="@row["CustomerID"]">@row["FullName"]</option>
+                                }
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-success w-100">Listele</button>
+                </div>
+                <div class="col-md-3">
+                    <a href="/Home/CustomerPurchases" class="btn btn-outline-secondary w-100">Temizle</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger">@ViewBag.Error</div>
+    }
+
+    <div class="card shadow">
+        <div class="card-header bg-light fw-bold">Satın Alım Listesi</div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped mb-0 align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Sipariş</th>
+                            <th>Tarih</th>
+                            <th>Müşteri</th>
+                            <th>Mağaza</th>
+                            <th>Ürün</th>
+                            <th>Tip</th>
+                            <th class="text-end">Adet</th>
+                            <th class="text-end">Birim</th>
+                            <th class="text-end">Toplam</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (ViewBag.Purchases != null && (ViewBag.Purchases as System.Data.DataTable).Rows.Count > 0)
+                        {
+                            foreach (System.Data.DataRow row in (ViewBag.Purchases as System.Data.DataTable).Rows)
+                            {
+                                <tr>
+                                    <td>@row["OrderID"]</td>
+                                    <td>@Convert.ToDateTime(row["OrderDate"]).ToString("dd.MM.yyyy")</td>
+                                    <td>@row["CustomerName"]</td>
+                                    <td>@row["StoreName"]</td>
+                                    <td>@row["ProductName"]</td>
+                                    <td>@row["ProductType"]</td>
+                                    <td class="text-end">@row["Quantity"]</td>
+                                    <td class="text-end">@row["UnitPrice"] ₺</td>
+                                    <td class="text-end">@row["LineTotal"] ₺</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="9" class="text-center text-muted py-4">Kayıt bulunamadı.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
